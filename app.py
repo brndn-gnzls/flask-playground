@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-
+# Store Routes
 @app.route("/stores", methods=["GET"])
 def get_stores():
     return {"stores": list(stores.values())}
@@ -36,6 +36,24 @@ def create_store():
     return store, 201
 
 
+@app.route("/store/<string:store_id>", methods=["GET"])
+def get_store(store_id):
+    try:
+        return stores[store_id]
+    except KeyError:
+        abort(404, message="[-] Store not found...")
+
+
+@app.route("/store/<string:store_id>", methods=["DELETE"])
+def delete_store(store_id):
+    try:
+        del stores[store_id]
+        return {"message": "[+] Store deleted!"}
+    except KeyError:
+        abort(404, message="[-] Store not found...")
+
+
+# Item Routes
 @app.route("/item", methods=["POST"])
 def create_item():
     item_data = request.get_json()
@@ -71,14 +89,6 @@ def get_items():
     return {"items": list(items.values())}
 
 
-@app.route("/store/<string:store_id>", methods=["GET"])
-def get_store(store_id):
-    try:
-        return stores[store_id]
-    except KeyError:
-        abort(404, message="[-] Store not found...")
-
-
 @app.route("/item/<string:item_id>", methods=["GET"])
 def get_item(item_id):
     try:
@@ -86,6 +96,29 @@ def get_item(item_id):
     except KeyError:
         abort(404, message="[-] Item not found...")
 
+
+@app.route("/item/<string:item_id>", methods=["DELETE"])
+def delete_item(item_id):
+    try:
+        del items[item_id]
+        return {"message": "[+] Item deleted!"}
+    except KeyError:
+        abort(404, message="[-] Item not found...")
+
+
+@app.route("/item/<string:item_id>", methods=["PUT"])
+def update_item(item_id):
+    item_data = request.get_json()
+    if "price" not in item_data or "name" not in item_data:
+        abort(400, message="[-] Bad request... Ensure 'price' and 'name' and included in the JSON payload...")
+
+    try:
+        item = items[item_id]
+        item |= item_data
+
+        return item
+    except KeyError:
+        abort(404, message="[-] Item not found...")
 
 
 if __name__ == '__main__':
