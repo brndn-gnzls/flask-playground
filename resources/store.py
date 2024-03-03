@@ -9,6 +9,8 @@ blp = Blueprint("stores", __name__, description="Operations on stores")
 
 @blp.route("/store/<string:store_id>")
 class Store(MethodView):
+
+    @blp.response(200, StoresSchema)
     def get(self, store_id):
         try:
             return stores[store_id]
@@ -27,6 +29,7 @@ class StoreList(MethodView):
 
 
     @blp.arguments(StoresSchema)
+    @blp.response(200, StoresSchema)
     def post(self, store_data):
         for store in stores.values():
             if store_data["name"] == store["name"]:
@@ -43,5 +46,7 @@ class StoreList(MethodView):
 @blp.route("/stores")
 class Stores(MethodView):
 
+    @blp.response(200, StoresSchema(many=True))  # Produces a list.
     def get(self):
-        return {"stores": list(stores.values())}
+        # return {"stores": list(stores.values())} <<< [!] No longer needed.
+        return stores.values() # Since blp.arguments produces a list, the above is not needed.

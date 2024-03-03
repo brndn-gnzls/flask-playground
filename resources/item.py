@@ -10,6 +10,7 @@ blp = Blueprint("items", __name__, description="Operations on items")
 @blp.route("/item/<string:item_id>")
 class Item(MethodView):
 
+    @blp.response(200, ItemSchema)
     def get(self, item_id):
         try:
             return items[item_id]
@@ -24,7 +25,8 @@ class Item(MethodView):
             abort(404, message="[-] Item not found...")
 
     @blp.arguments(ItemUpdateSchema)
-    def post(self, item_data, item_id): # item_data contains the validated fields ItemSchema requested.
+    @blp.response(200, ItemSchema)
+    def put(self, item_data, item_id): # item_data contains the validated fields ItemSchema requested.
         try:
             item = items[item_id]
             item |= item_data
@@ -37,13 +39,16 @@ class Item(MethodView):
 @blp.route("/items")
 class Items(MethodView):
 
+    @blp.response(200, ItemSchema(many=True)) # Produces a list.
     def get(self):
-        return {"items": list(items.values())}
+        # return {"items": list(items.values())} <<< [!] No longer needed.
+        return items.values() # Since blp.response produces a list, the above is not needed.
 
 @blp.route("/item")
 class ItemList(MethodView):
 
     @blp.arguments(ItemSchema)
+    @blp.response(201, ItemSchema)
     def post(self, item_data):  # item_data contains the validated fields ItemSchema requested.
         for item in items.values():
             if (
