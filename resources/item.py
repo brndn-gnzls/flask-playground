@@ -3,6 +3,7 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import items, stores
+from schemas import ItemSchema, ItemUpdateSchema
 
 blp = Blueprint("items", __name__, description="Operations on items")
 
@@ -22,11 +23,8 @@ class Item(MethodView):
         except KeyError:
             abort(404, message="[-] Item not found...")
 
-    def update(self, item_id):
-        item_data = request.get_json()
-        if "price" not in item_data or "name" not in item_data:
-            abort(400, message="[-] Bad request... Ensure 'price' and 'name' and included in the JSON payload...")
-
+    @blp.arguments(ItemUpdateSchema)
+    def post(self, item_data, item_id): # item_data contains the validated fields ItemSchema requested.
         try:
             item = items[item_id]
             item |= item_data
@@ -45,18 +43,8 @@ class Items(MethodView):
 @blp.route("/item")
 class ItemList(MethodView):
 
-    def post(self):
-        item_data = request.get_json()
-        if (
-            "price" not in item_data
-            or "store_id" not in item_data
-            or "name" not in item_data
-        ):
-            abort(
-                400,
-                message="[-] Bad Request... Ensure 'price', 'store_id', and 'name' are included in the JSON payload."
-            )
-
+    @blp.arguments(ItemSchema)
+    def post(self, item_data):  # item_data contains the validated fields ItemSchema requested.
         for item in items.values():
             if (
                 item_data["name"] == item["name"]
