@@ -2,8 +2,11 @@ import uuid
 from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from db import stores
 from schemas import StoresSchema
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from models import StoreModel
+from db import db
 
 blp = Blueprint("stores", __name__, description="Operations on stores")
 
@@ -12,17 +15,13 @@ class Store(MethodView):
 
     @blp.response(200, StoresSchema)
     def get(self, store_id):
-        try:
-            return stores[store_id]
-        except KeyError:
-            abort(404, message="[-] Store not found...")
+        store = StoreModel.query.get_or_404(store_id)
+
+        return store
 
     def delete(self, store_id):
-        try:
-            del stores[store_id]
-            return {"message": "[+] Store deleted!"}
-        except KeyError:
-            abort(404, message="[-] Store not found...")
+        store = StoreModel.query.get_or_404(store_id)
+        raise NotImplementedError("[!] Deleting a store is not implemented.")
 
 @blp.route("/store")
 class StoreList(MethodView):
@@ -31,17 +30,18 @@ class StoreList(MethodView):
     @blp.arguments(StoresSchema)
     @blp.response(200, StoresSchema)
     def post(self, store_data):
-        for store in stores.values():
-            if store_data["name"] == store["name"]:
-                abort(400, message=f"[!] Store already exists...")
+        store = StoreModel(**store_data)
 
-        store_id = uuid.uuid4().hex
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except IntegrityError as e:
+            abort(400, message=f"[!] A store with that name already exists: {e}")
+        except SQLAlchemyError as e:
+            abort(500, message=f"[-] An error occurred creating the store: {e}")
+            
 
-        # Unpack the data in the variable and add the uuid for the store.
-        store = {**store_data, "id": store_id}
-        stores[store_id] = store
-
-        return store, 201
+        return store
     
 @blp.route("/stores")
 class Stores(MethodView):
