@@ -19,9 +19,13 @@ class Store(MethodView):
 
         return store
 
+    @blp.response(200)
     def delete(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
-        raise NotImplementedError("[!] Deleting a store is not implemented.")
+        db.session.delete(store)
+        db.session.commit()
+
+        return "[+] Store successfully deleted!", 200
 
 @blp.route("/store")
 class StoreList(MethodView):
@@ -49,4 +53,5 @@ class Stores(MethodView):
     @blp.response(200, StoresSchema(many=True))  # Produces a list.
     def get(self):
         # return {"stores": list(stores.values())} <<< [!] No longer needed.
-        return stores.values() # Since blp.arguments produces a list, the above is not needed.
+        # return stores.values() # Since blp.arguments produces a list, the above is not needed.
+        return StoreModel.query.all()

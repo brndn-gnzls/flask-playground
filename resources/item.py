@@ -17,15 +17,30 @@ class Item(MethodView):
 
         return item
 
+    @blp.response(200)
     def delete(self, item_id):
         item = ItemModel.query.get_or_404(item_id)
-        raise NotImplementedError("[!] Deleting an item is not implemented.")
+        db.session.delete(item)
+        db.session.commit()
+
+        return "[+] Item successfully deleted!", 200
+        
 
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, item_data, item_id): # item_data contains the validated fields ItemSchema requested.
-        item = ItemModel.query.get_or_404(item_id)
-        raise NotImplementedError("[!] Updating an item is not implemented.")
+        item = ItemModel.query.get(item_id)
+
+        if item:
+            item.name = item_data["name"]
+            item.price = item_data["price"]
+        else:
+            item = ItemModel(id=item_id, **item_data)
+        
+        db.session.add(item)
+        db.session.commit()
+
+        return item
 
 @blp.route("/items")
 class Items(MethodView):
@@ -33,7 +48,8 @@ class Items(MethodView):
     @blp.response(200, ItemSchema(many=True)) # Produces a list.
     def get(self):
         # return {"items": list(items.values())} <<< [!] No longer needed.
-        return items.values() # Since blp.response produces a list, the above is not needed.
+        # return items.values() # Since blp.response produces a list, the above is not needed.
+        return ItemModel.query.all()
 
 @blp.route("/item")
 class ItemList(MethodView):
