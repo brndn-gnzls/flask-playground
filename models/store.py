@@ -10,3 +10,4 @@ class StoreModel(db.Model):
 
     # Two ends of a relationship to ItemModel.store.
     items = db.relationship("ItemModel", back_populates="store", lazy="dynamic")
+    tags = db.relationship("TagModel", back_populates="store", lazy="dynamic")
