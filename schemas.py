@@ -4,14 +4,14 @@ from marshmallow import Schema, fields
 # of the fields, and not the nested fields.
 class PlainItemSchema(Schema):
 
-    id = fields.Str(dump_only=True)
+    id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
     price = fields.Float(required=True)
 
 
 class PlainStoreSchema(Schema):
 
-    id = fields.Str(dump_only=True)
+    id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
 
 
