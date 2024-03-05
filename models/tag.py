@@ -5,6 +5,6 @@ class TagModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
-    store_id = db.Column(db.Integer(), db.ForeignKey("stored.id"), nullable=False)
+    store_id = db.Column(db.Integer(), db.ForeignKey("store.id"), nullable=False)
 
     store = db.relationship("StoreModel", back_populates=True)
