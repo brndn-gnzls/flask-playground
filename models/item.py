@@ -19,3 +19,6 @@ class ItemModel(db.Model):
     # a relationship with stores table. Below, store now contains a StoreModel
     # object whose id matches the foreign key defined above.
     store = db.relationship("StoreModel", back_populates="items") # back_populate means the StoreModel class will have an items relationship.
+
+    # This also must be done item_tags.py.
+    tags = db.relationship("TagModel", back_populates="items", secondary="items_tags")
