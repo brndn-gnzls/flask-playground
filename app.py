@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_smorest import Api
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 from db import db
 import models
@@ -28,6 +29,8 @@ def create_app(db_url=None):
     db.init_app(app)
 
     api = Api(app)
+
+    jwt = JWTManager(app)
 
     with app.app_context():
         try:
