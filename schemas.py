@@ -67,4 +67,6 @@ class TagAndItemSchema(Schema):
 class UserSchema(Schema):
     id = fields.Int(dump_only=True) # since we never receive an id from the client
     username = fields.Str(required=True)
-    password = fields.Strr(required=True, load_only=True) # ensures the password is never sent to the client
+    # if load_only=False then when you return a user object
+    # the password will be included in the response.
+    password = fields.Str(required=True, load_only=True) # ensures the password is never sent to the client
