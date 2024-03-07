@@ -10,6 +10,7 @@ from db import db
 
 blp = Blueprint("users", __name__, description="Operations on users")
 
+
 @blp.route("/register")
 class UserRegistration(MethodView):
     @blp.arguments(UserSchema)
@@ -17,7 +18,7 @@ class UserRegistration(MethodView):
 
         user = UserModel(
             username=user_data["username"],
-            password=pbkdf2_sha256.hash(user_data["password"])
+            password=pbkdf2_sha256.hash(user_data["password"]),
         )
 
         try:
@@ -26,11 +27,27 @@ class UserRegistration(MethodView):
             return {"message": "[+] User successfully created!"}, 201
         except IntegrityError as e:
             db.session.rollback()
-            abort(400, message=f"[!] A user with that username already exists: {str(e)}")
+            abort(
+                400, message=f"[!] A user with that username already exists: {str(e)}"
+            )
+
+
+@blp.route("/login")
+class UserLogin(MethodView):
+    @blp.arguments(UserSchema)
+    def post(self, user_data):
+        user = UserModel.query.filter( UserModel.username == user_data["username"] ).first()
+
+        if user and pbkdf2_sha256.verify(user_data["password"], user.password):
+            access_token = create_access_token(identity=user.id)
+            return {"access token": access_token}
+
+        abort(401, message="[!] Invalid credentials...")
+
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
-    
+
     @blp.response(200, UserSchema)
     def get(self, user_id):
         user = UserModel.query.get_or_404(user_id)

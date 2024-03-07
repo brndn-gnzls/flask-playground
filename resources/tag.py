@@ -1,5 +1,5 @@
-from flask import request
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 from flask_smorest import Blueprint, abort
 from schemas import TagSchema, TagAndItemSchema
 from models import StoreModel, TagModel, ItemModel
@@ -18,6 +18,7 @@ class TagInStore(MethodView):
 
         return store.tags.all()
 
+    @jwt_required()
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema)
     def post(self, tag_data, store_id):
@@ -44,6 +45,7 @@ class Tag(MethodView):
 @blp.route("/item/<int:item_id>/tag/<int:tag_id>")
 class LinkTagsToItem(MethodView):
 
+    @jwt_required()
     @blp.response(201, TagSchema)
     def post(self, item_id, tag_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -60,6 +62,7 @@ class LinkTagsToItem(MethodView):
         return tag
 
 
+    @jwt_required()
     @blp.response(200, TagAndItemSchema)
     def delete(self, item_id, tag_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -86,6 +89,7 @@ class Tag(MethodView):
 
         return tag
 
+    @jwt_required()
     @blp.response(202, description="Deletes a tag if no item is tagged with it.", example={"message": "[+] Tag deleted!"})
     @blp.alt_response(404, description="[!] Tag not found.")
     @blp.alt_response(400, description="Returned if the tag is assigned to one or more items. In this case, the tag is not deleted.")

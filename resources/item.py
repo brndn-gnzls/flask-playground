@@ -1,10 +1,10 @@
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from schemas import ItemSchema, ItemUpdateSchema
 from models import ItemModel
 from db import db
 from sqlalchemy.exc import SQLAlchemyError
+from flask_jwt_extended import jwt_required
 
 blp = Blueprint("items", __name__, description="Operations on items")
 
@@ -17,6 +17,7 @@ class Item(MethodView):
 
         return item
 
+    @jwt_required()
     @blp.response(200)
     def delete(self, item_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -26,6 +27,7 @@ class Item(MethodView):
         return "[+] Item successfully deleted!", 200
         
 
+    @jwt_required()
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, item_data, item_id): # item_data contains the validated fields ItemSchema requested.
@@ -54,6 +56,7 @@ class Items(MethodView):
 @blp.route("/item")
 class ItemList(MethodView):
 
+    @jwt_required()
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):  # item_data contains the validated fields ItemSchema requested.
