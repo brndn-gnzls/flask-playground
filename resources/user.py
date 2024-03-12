@@ -2,7 +2,8 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt, jwt_required
+from blocklist import BLOCKLIST
 
 from schemas import UserSchema
 from models import UserModel
@@ -58,3 +59,16 @@ class User(MethodView):
         db.session.delete(user)
         db.session.commit()
         return {"message": "[+] User deleted!"}, 200
+
+
+# Logout
+@blp.route("/logout")
+class UserLogout(MethodView):
+
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"message": "[+] Successfully logged out!"}
+
+        
