@@ -47,6 +47,7 @@ class Item(MethodView):
 @blp.route("/items")
 class Items(MethodView):
 
+    @jwt_required()
     @blp.response(200, ItemSchema(many=True)) # Produces a list.
     def get(self):
         # return {"items": list(items.values())} <<< [!] No longer needed.
@@ -56,7 +57,7 @@ class Items(MethodView):
 @blp.route("/item")
 class ItemList(MethodView):
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):  # item_data contains the validated fields ItemSchema requested.
