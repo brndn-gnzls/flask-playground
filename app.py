@@ -4,6 +4,7 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from db import db
 from blocklist import BLOCKLIST
@@ -34,6 +35,8 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
+
+    migrate = Migrate(app, db)
 
     api = Api(app)
 
@@ -104,12 +107,12 @@ def create_app(db_url=None):
             401,
         )
 
-    with app.app_context():
-        try:
-            db.create_all()
-            print(f"[+] Database created: {os.getcwd()}")
-        except Exception as e:
-            print(f"[-] Error creating dtabase: {e}")
+    # with app.app_context():
+    #     try:
+    #         db.create_all()
+    #         print(f"[+] Database created: {os.getcwd()}")
+    #     except Exception as e:
+    #         print(f"[-] Error creating dtabase: {e}")
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
