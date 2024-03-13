@@ -10,6 +10,7 @@ class ItemModel(db.Model):
     # Define columns in table.
     id = db.Column(db.Integer, primary_key=True)  # auto-incrementing
     name = db.Column(db.String(80), unique=True, nullable=False)  # 80 character limit
+    description = db.Column(db.String)
     price = db.Column(db.Float(precision=2), unique=False, nullable=False)
 
     # Map store_id to the id column in the stores table. <<< [!] stores table not stores model or file.
