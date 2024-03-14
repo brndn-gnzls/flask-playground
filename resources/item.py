@@ -36,6 +36,7 @@ class Item(MethodView):
         if item:
             item.name = item_data["name"]
             item.price = item_data["price"]
+            item.description = item_data["description"]
         else:
             item = ItemModel(id=item_id, **item_data)
         
