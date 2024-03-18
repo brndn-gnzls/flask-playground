@@ -72,3 +72,6 @@ class UserSchema(Schema):
     # if load_only=False then when you return a user object
     # the password will be included in the response.
     password = fields.Str(required=True, load_only=True) # ensures the password is never sent to the client
+
+class UserRegistrationSchema(UserSchema):
+    email = fields.Str(required=True)
